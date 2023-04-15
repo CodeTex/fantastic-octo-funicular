@@ -2,6 +2,7 @@
 
 use rocket::serde::json::Json;
 use rocket::serde::{Serialize, Deserialize};
+use rocket_dyn_templates::{Template, context};
 
 #[derive(Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]
@@ -11,7 +12,7 @@ struct Task {
 }
 
 #[get("/")]
-fn index() -> &'static str {
+fn hello() -> &'static str {
     "Hello, world!"
 }
 
@@ -24,9 +25,20 @@ fn todo() -> Json<Task> {
     Json(task)
 }
 
+#[get("/index")]
+fn index() -> Template {
+    Template::render(
+        "index",
+        context! {
+            field: "value"
+        }
+    )
+}
+
 #[launch]
 fn rocket() -> _ {
     rocket::build()
-        .mount("/", routes![index, todo])
+        .mount("/", routes![hello, index, todo])
+        .attach(Template::fairing())
 }
 
